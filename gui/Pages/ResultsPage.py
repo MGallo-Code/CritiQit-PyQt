@@ -4,18 +4,19 @@ from PySide6.QtWidgets import (
     QFrame
 )
 from PySide6.QtCore import QSize, Qt
-from PySide6.QtGui import QFont
+from PySide6.QtGui import QFont, QCursor
 
 from gui.Pages.BasePage import BasePage
 from gui.Pages.MovieDetailsPage import MovieDetailsPage
 from gui.Pages.ShowDetailsPage import ShowDetailsPage
-from gui.CustomWidgets.ImageWidgets import ImageButton
+from gui.CustomWidgets.ImageWidgets import ImageLabel
 
 class ResultItemWidget(QFrame):
     """A custom widget to display a single search result item"""
     def __init__(self, result, is_movie, on_click):
         super().__init__()
         self.setFrameStyle(QFrame.StyledPanel | QFrame.Raised)
+        self.setCursor(QCursor(Qt.PointingHandCursor))  # Show pointer cursor on hover
         self.setStyleSheet("""
             QFrame {
                 background-color: white;
@@ -28,20 +29,19 @@ class ResultItemWidget(QFrame):
             }
         """)
         
+        # Store the click handler
+        self.on_click = on_click
+        
         # Main layout
         layout = QHBoxLayout(self)
         layout.setContentsMargins(8, 8, 8, 8)
         layout.setSpacing(12)
 
-        # Create button with image support
-        btn = ImageButton("", default_width=60, default_height=90)
-        btn.clicked.connect(on_click)
-        btn.setStyleSheet("""
-            QPushButton {
+        # Create image label for poster
+        self.poster_label = ImageLabel(default_width=60, default_height=90)
+        self.poster_label.setStyleSheet("""
+            QLabel {
                 border: none;
-                background: transparent;
-            }
-            QPushButton:hover {
                 background: transparent;
             }
         """)
@@ -51,7 +51,7 @@ class ResultItemWidget(QFrame):
         poster_url = None
         if poster_path:
             poster_url = f"https://image.tmdb.org/t/p/w154{poster_path}"
-        btn.set_image(poster_url, size=(60, 90))
+        self.poster_label.set_image(poster_url, size=(60, 90))
 
         # Right side content
         content_widget = QWidget()
@@ -111,8 +111,14 @@ class ResultItemWidget(QFrame):
         content_layout.addStretch()
 
         # Add widgets to main layout
-        layout.addWidget(btn)
+        layout.addWidget(self.poster_label)
         layout.addWidget(content_widget, 1)  # Give content widget stretch factor 1
+
+    def mousePressEvent(self, event):
+        """Handle mouse press events to make the entire widget clickable"""
+        if event.button() == Qt.LeftButton:
+            self.on_click()
+        super().mousePressEvent(event)
 
 class ResultsPage(BasePage):
     def __init__(self, navigation_controller, api_manager, rating_manager, results, is_movie):
