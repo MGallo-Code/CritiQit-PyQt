@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QLabel, QPushButton, QSizePolicy
 from PySide6.QtGui import QIcon, QPixmap, QPainter, QColor, QPen
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QSize
 
 from gui.CustomWidgets.ImageDisplayMixin import ImageDisplayMixin
 
@@ -89,7 +89,7 @@ class ImageButton(QPushButton, ImageDisplayMixin):
             # Set a placeholder icon using the helper. Icon QPixmap needs to be square for best results.
             icon_size = min(self.default_width, self.default_height) - 6 # Small padding
             self.setIcon(QIcon(create_placeholder_pixmap(icon_size, icon_size, text="...")))
-            self.setIconSize(Qt.QSize(icon_size, icon_size))
+            self.setIconSize(QSize(icon_size, icon_size))
             if not text:
                  self.setText("") # Clear placeholder text if fixed size
         else:
@@ -100,7 +100,7 @@ class ImageButton(QPushButton, ImageDisplayMixin):
         """Set the loaded image as the button's icon"""
         self.setIcon(QIcon(pixmap))
         if self.default_width is not None and self.default_height is not None:
-             self.setIconSize(Qt.QSize(self.default_width - 6, self.default_height - 6)) # Allow some padding
+             self.setIconSize(QSize(self.default_width - 6, self.default_height - 6)) # Corrected to QSize
         else:
              self.setIconSize(pixmap.size())
              self.adjustSize() 
@@ -123,4 +123,4 @@ class ImageButton(QPushButton, ImageDisplayMixin):
             self.setIcon(QIcon(create_placeholder_pixmap(icon_size, icon_size, icon_char="🖼️")))
         else:
             self.setIcon(QIcon(create_placeholder_pixmap(icon_size, icon_size, icon_char="!")))
-        self.setIconSize(Qt.QSize(icon_size, icon_size)) 
+        self.setIconSize(QSize(icon_size, icon_size)) # Corrected to QSize 
