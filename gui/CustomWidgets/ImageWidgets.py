@@ -1,8 +1,11 @@
 from PySide6.QtWidgets import QLabel, QPushButton, QSizePolicy
 from PySide6.QtGui import QIcon, QPixmap, QPainter, QColor, QPen
 from PySide6.QtCore import Qt, QSize
+import logging
 
 from gui.CustomWidgets.ImageDisplayMixin import ImageDisplayMixin
+
+logger = logging.getLogger(__name__)
 
 def create_placeholder_pixmap(width, height, text=None, icon_char=None):
     """Helper to create a placeholder pixmap with optional text or icon character."""
@@ -33,42 +36,43 @@ def create_placeholder_pixmap(width, height, text=None, icon_char=None):
 class ImageLabel(QLabel, ImageDisplayMixin):
     """
     A QLabel that can display images asynchronously.
-    It can reserve space using default_width and default_height.
+    It can reserve vertical space using fixed_height.
+    The width will adjust to preserve aspect ratio.
     """
-    def __init__(self, parent=None, async_loading=True, default_width=None, default_height=None):
+    def __init__(self, parent=None, async_loading=True, fixed_height=None):
         QLabel.__init__(self, parent)
         ImageDisplayMixin.__init__(self, async_loading)
         self.setAlignment(Qt.AlignCenter)
-        self.default_width = default_width
-        self.default_height = default_height
+        self.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+        self.fixed_height = fixed_height
 
-        if self.default_width is not None and self.default_height is not None:
-            self.setFixedSize(self.default_width, self.default_height)
-            # Use helper for placeholder
-            self.setPixmap(create_placeholder_pixmap(self.default_width, self.default_height, text="Loading..."))
+        if self.fixed_height is not None:
+            self.setFixedHeight(self.fixed_height)
+            self.setText("Loading...")
         else:
-            self.setText("Loading...") 
+            self.setText("Loading...")
             self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
 
-
     def _on_image_loaded(self, url, pixmap, load_time):
-        """Set the loaded image as the label's pixmap"""
-        if self.default_width is None or self.default_height is None:
-             # If no default size was given, adjust to the loaded image size
-            self.setFixedSize(pixmap.width(), pixmap.height())
-
-        self.setPixmap(pixmap)
+        print(f"[ImageLabel] URL: {url}")
+        print(f"[ImageLabel] Label size before: {self.width()}x{self.height()}")
+        print(f"[ImageLabel] Original pixmap size: {pixmap.width()}x{pixmap.height()}")
+        if self.fixed_height is not None:
+            # Scale to fixed height, width adjusts to preserve aspect ratio
+            scaled_pixmap = pixmap.scaledToHeight(self.fixed_height, Qt.SmoothTransformation)
+        else:
+            scaled_pixmap = pixmap
+        print(f"[ImageLabel] Scaled pixmap size: {scaled_pixmap.width()}x{scaled_pixmap.height()}")
+        self.setPixmap(scaled_pixmap)
+        print(f"[ImageLabel] Label size after: {self.width()}x{self.height()}")
 
     def _on_image_error(self, url, error_message):
-        """Display error message or placeholder when image loading fails"""
-        width = self.default_width if self.default_width is not None else self.width() if self.width() > 20 else 100
-        height = self.default_height if self.default_height is not None else self.height() if self.height() > 20 else 100
-        
-        if not self.default_width or not self.default_height:
-            self.setFixedSize(width, height)
-
+        print(f"[ImageLabel] Error loading image from URL: {url}")
+        print(f"[ImageLabel] Error message: {error_message}")
+        height = self.fixed_height if self.fixed_height is not None else self.height() if self.height() > 20 else 100
+        width = int(height * 2 / 3)  # Use 2:3 ratio for placeholder
         if error_message == "No URL provided":
-            self.setPixmap(create_placeholder_pixmap(width, height, icon_char="🖼️")) # Unicode picture frame
+            self.setPixmap(create_placeholder_pixmap(width, height, icon_char="🖼️"))
         else:
             self.setPixmap(create_placeholder_pixmap(width, height, text="Error"))
 

@@ -57,6 +57,8 @@ class ImageLoaderTask(QRunnable):
             if os.path.exists(cache_path):
                 pixmap = QPixmap(cache_path)
                 if not pixmap.isNull():
+                    print(f"[AsyncImageLoader] (cache) URL: {self.url}")
+                    print(f"[AsyncImageLoader] (cache) Original pixmap size: {pixmap.width()}x{pixmap.height()}")
                     # Scale if needed
                     if self.size:
                         pixmap = pixmap.scaled(
@@ -64,7 +66,6 @@ class ImageLoaderTask(QRunnable):
                             Qt.KeepAspectRatio,
                             Qt.SmoothTransformation
                         )
-                    
                     load_time = time.time() - start_time
                     self.signals.cache_hit.emit(self.url, pixmap, "disk", load_time)
                     logger.debug(f"Image loaded from disk cache: {self.url} in {load_time:.3f}s")
@@ -86,7 +87,8 @@ class ImageLoaderTask(QRunnable):
                 self.signals.error.emit(self.url, err_msg)
                 logger.error(f"Image decode error: {self.url} - {err_msg}")
                 return
-                
+            print(f"[AsyncImageLoader] (network) URL: {self.url}")
+            print(f"[AsyncImageLoader] (network) Original pixmap size: {pixmap.width()}x{pixmap.height()}")
             # Scale if needed
             if self.size:
                 pixmap = pixmap.scaled(
@@ -94,7 +96,6 @@ class ImageLoaderTask(QRunnable):
                     Qt.KeepAspectRatio, 
                     Qt.SmoothTransformation
                 )
-                
             # Save to disk cache
             try:
                 original_pixmap = QPixmap()
@@ -102,7 +103,6 @@ class ImageLoaderTask(QRunnable):
                 original_pixmap.save(cache_path, "JPEG", 90)
             except Exception as e:
                 logger.warning(f"Failed to save to disk cache: {self.url} - {e}")
-                
             # Return the pixmap
             load_time = time.time() - start_time
             self.signals.finished.emit(self.url, pixmap, load_time)

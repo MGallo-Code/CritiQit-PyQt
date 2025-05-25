@@ -38,27 +38,15 @@ class ResultItemWidget(QFrame):
         layout.setSpacing(12)
 
         # Create image label for poster
-        self.poster_label = ImageLabel(default_width=60, default_height=90)
+        self.poster_label = ImageLabel(fixed_height=90)
         self.poster_label.setStyleSheet("""
             QLabel {
                 border: none;
                 background: transparent;
             }
         """)
+        self.poster_label.setAlignment(Qt.AlignCenter)  # Center the image within the label
         
-        # Set the poster image if available
-        poster_path = result.get('poster_path')
-        poster_url = None
-        if poster_path:
-            poster_url = f"https://image.tmdb.org/t/p/w154{poster_path}"
-        self.poster_label.set_image(poster_url, size=(60, 90))
-
-        # Right side content
-        content_widget = QWidget()
-        content_layout = QVBoxLayout(content_widget)
-        content_layout.setContentsMargins(0, 0, 0, 0)
-        content_layout.setSpacing(4)
-
         # Title and date
         if is_movie:
             title = result.get('title', 'Unknown Title')
@@ -66,6 +54,20 @@ class ResultItemWidget(QFrame):
         else:
             title = result.get('name', 'Unknown Name')
             date = result.get('first_air_date', 'Unknown Date')
+
+        # Set the poster image if available
+        poster_path = result.get('poster_path')
+        poster_url = None
+        if poster_path:
+            poster_url = f"https://image.tmdb.org/t/p/w154{poster_path}"
+            print(f"Loading poster for {title}: {poster_url}")  # Debug print
+        self.poster_label.set_image(poster_url)
+
+        # Right side content
+        content_widget = QWidget()
+        content_layout = QVBoxLayout(content_widget)
+        content_layout.setContentsMargins(0, 0, 0, 0)
+        content_layout.setSpacing(4)
 
         title_label = QLabel(f"<b>{title}</b> ({date})")
         title_label.setStyleSheet("font-size: 14px;")
