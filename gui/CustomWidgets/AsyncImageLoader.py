@@ -57,8 +57,8 @@ class ImageLoaderTask(QRunnable):
             if os.path.exists(cache_path):
                 pixmap = QPixmap(cache_path)
                 if not pixmap.isNull():
-                    print(f"[AsyncImageLoader] (cache) URL: {self.url}")
-                    print(f"[AsyncImageLoader] (cache) Original pixmap size: {pixmap.width()}x{pixmap.height()}")
+                    logger.debug(f"[AsyncImageLoader] (cache) URL: {self.url}")
+                    logger.debug(f"[AsyncImageLoader] (cache) Original pixmap size: {pixmap.width()}x{pixmap.height()}")
                     # Scale if needed
                     if self.size:
                         pixmap = pixmap.scaled(
@@ -87,8 +87,8 @@ class ImageLoaderTask(QRunnable):
                 self.signals.error.emit(self.url, err_msg)
                 logger.error(f"Image decode error: {self.url} - {err_msg}")
                 return
-            print(f"[AsyncImageLoader] (network) URL: {self.url}")
-            print(f"[AsyncImageLoader] (network) Original pixmap size: {pixmap.width()}x{pixmap.height()}")
+            logger.debug(f"[AsyncImageLoader] (network) URL: {self.url}")
+            logger.debug(f"[AsyncImageLoader] (network) Original pixmap size: {pixmap.width()}x{pixmap.height()}")
             # Scale if needed
             if self.size:
                 pixmap = pixmap.scaled(

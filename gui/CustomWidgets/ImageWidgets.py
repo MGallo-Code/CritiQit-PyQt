@@ -54,21 +54,16 @@ class ImageLabel(QLabel, ImageDisplayMixin):
             self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
 
     def _on_image_loaded(self, url, pixmap, load_time):
-        print(f"[ImageLabel] URL: {url}")
-        print(f"[ImageLabel] Label size before: {self.width()}x{self.height()}")
-        print(f"[ImageLabel] Original pixmap size: {pixmap.width()}x{pixmap.height()}")
         if self.fixed_height is not None:
             # Scale to fixed height, width adjusts to preserve aspect ratio
             scaled_pixmap = pixmap.scaledToHeight(self.fixed_height, Qt.SmoothTransformation)
         else:
             scaled_pixmap = pixmap
-        print(f"[ImageLabel] Scaled pixmap size: {scaled_pixmap.width()}x{scaled_pixmap.height()}")
         self.setPixmap(scaled_pixmap)
-        print(f"[ImageLabel] Label size after: {self.width()}x{self.height()}")
 
     def _on_image_error(self, url, error_message):
-        print(f"[ImageLabel] Error loading image from URL: {url}")
-        print(f"[ImageLabel] Error message: {error_message}")
+        logger.error(f"[ImageLabel] Error loading image from URL: {url}")
+        logger.error(f"[ImageLabel] Error message: {error_message}")
         height = self.fixed_height if self.fixed_height is not None else self.height() if self.height() > 20 else 100
         width = int(height * 2 / 3)  # Use 2:3 ratio for placeholder
         if error_message == "No URL provided":
