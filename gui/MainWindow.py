@@ -11,6 +11,7 @@ from gui.Pages.ResultsPage import ResultsPage
 from ratings.RatingManager import RatingManager
 from utils.APIManager import APIManager
 from utils.content_helpers import parse_content_id
+from utils.user_preferences import UserPreferences
 from gui.utils.load_stylesheet import load_stylesheet
 from PySide6.QtWidgets import QApplication
 
@@ -21,8 +22,9 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(800, 600)
         self.resize(800, 600)
 
-        # Initialize Rating API Manager and Navigation Controller
-        self.api_manager = APIManager()
+        # Initialize managers and preferences
+        self.user_preferences = UserPreferences()
+        self.api_manager = APIManager(language=self.user_preferences.get_default_language())
         self.rating_manager = RatingManager()
         self.nav_controller = NavigationController()
 
@@ -48,7 +50,6 @@ class MainWindow(QMainWindow):
         self.content_layout.setContentsMargins(0, 0, 0, 0)
         self.content_area.setLayout(self.content_layout)
         load_stylesheet(self.content_area, 'gui/static/styles_content_area.qss')
-
 
         # Add the content area to the main layout
         main_layout.addWidget(self.content_area)
@@ -127,6 +128,13 @@ class MainWindow(QMainWindow):
         self.type_selector.addItems(["TV Show", "Movie"])
         nav_bar.addWidget(self.type_selector)
 
+        # Language Selector
+        self.language_selector = QComboBox()
+        self.language_selector.addItems(self.user_preferences.get_available_languages())
+        self.language_selector.setCurrentText(self.user_preferences.get_default_language())
+        self.language_selector.currentTextChanged.connect(self.on_language_changed)
+        nav_bar.addWidget(self.language_selector)
+
         # Search Field
         self.search_field = QLineEdit()
         self.search_field.setPlaceholderText("Search...")
@@ -158,6 +166,16 @@ class MainWindow(QMainWindow):
             self.nav_controller.forward()
             self.update_navigation_buttons()
 
+    def on_language_changed(self, language):
+        """Handle language selection change."""
+        # Update API manager with new language
+        self.api_manager = APIManager(language=language)
+        # Save preference
+        self.user_preferences.update_preference("default_language", language)
+        # Refresh current page if it's a ResultsPage
+        if isinstance(self.current_widget, ResultsPage):
+            self.current_widget.refresh_page()
+
     def perform_search(self):
         query = self.search_field.text().strip()
         if not query:
@@ -166,6 +184,7 @@ class MainWindow(QMainWindow):
         content_type = 'movie' if is_movie else 'tv'
         results = self.api_manager.get_search(query, content_type)
         results_page = ResultsPage(self.nav_controller, self.api_manager, self.rating_manager, results, is_movie)
+        results_page.current_query = query  # Store the current query for refresh
         self.nav_controller.push(results_page)
         self.update_navigation_buttons()
 

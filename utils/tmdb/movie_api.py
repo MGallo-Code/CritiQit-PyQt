@@ -23,12 +23,24 @@ class MovieAPI:
             page (int): The page number to retrieve.
             
         Returns:
-            list: A list of movie results, or an empty list on error.
+            list: A list of movie results sorted by language, with selected language first.
         """
         endpoint = "search/movie"
-        params = {"query": quote(query), "include_adult": "false", "page": page}
+        params = {
+            "query": quote(query),
+            "include_adult": "false",
+            "page": page
+        }
         response = self.client.get(endpoint, params=params)
-        return response.get('results', []) if response else []
+        results = response.get('results', []) if response else []
+        
+        # Sort results by language, with selected language first
+        target_lang = self.client.language.split('-')[0]
+        return sorted(results, key=lambda x: (
+            x.get('original_language', '') != target_lang,  # False (0) for target language comes first
+            x.get('vote_average', 0) == 0,  # True (1) for unrated movies, putting them last
+            -x.get('popularity', 0)  # Negative for descending order (higher popularity first)
+        ))
 
     def get_movie_details(self, movie_id):
         """

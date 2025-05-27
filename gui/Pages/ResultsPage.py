@@ -130,7 +130,12 @@ class ResultsPage(BasePage):
         self.rating_manager = rating_manager
         self.results = results
         self.is_movie = is_movie
+        self.current_query = ""  # Store the current search query
 
+        self.setup_ui()
+
+    def setup_ui(self):
+        """Set up the user interface with scrollable content area"""
         layout = QVBoxLayout(self)
         layout.setContentsMargins(16, 16, 16, 16)
         layout.setSpacing(16)
@@ -156,17 +161,35 @@ class ResultsPage(BasePage):
         self.results_layout.setSpacing(8)
 
         # Build the UI for each result
-        for result in self.results:
-            if self.is_movie:
-                item = ResultItemWidget(result, True, lambda r=result: self.show_movie_details(r))
-            else:
-                item = ResultItemWidget(result, False, lambda r=result: self.show_tv_details(r))
-            self.results_layout.addWidget(item)
+        self._populate_results()
 
         self.results_layout.addStretch()
         scroll_content.setLayout(self.results_layout)
         scroll_area.setWidget(scroll_content)
         layout.addWidget(scroll_area)
+
+    def _populate_results(self):
+        """Populate the results area with result items"""
+        # Clear existing results
+        while self.results_layout.count() > 1:  # Keep the stretch item
+            item = self.results_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+        # Add new results
+        for result in self.results:
+            if self.is_movie:
+                item = ResultItemWidget(result, True, lambda r=result: self.show_movie_details(r))
+            else:
+                item = ResultItemWidget(result, False, lambda r=result: self.show_tv_details(r))
+            self.results_layout.insertWidget(self.results_layout.count() - 1, item)
+
+    def refresh_page(self):
+        """Refresh the results with the current language setting"""
+        if self.current_query:
+            content_type = 'movie' if self.is_movie else 'tv'
+            self.results = self.api_manager.get_search(self.current_query, content_type)
+            self._populate_results()
 
     def show_movie_details(self, movie):
         page = MovieDetailsPage(self.nav, self.api_manager, self.rating_manager, movie)

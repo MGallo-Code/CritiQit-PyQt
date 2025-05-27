@@ -18,11 +18,26 @@ class TvAPI:
     def get_search_tv_shows(self, query, page=1):
         """
         Search for TV shows on TMDB.
+        
+        Returns:
+            list: A list of TV show results sorted by language, with selected language first.
         """
         endpoint = "search/tv"
-        params = {"query": quote(query), "include_adult": "false", "page": page}
+        params = {
+            "query": quote(query),
+            "include_adult": "false",
+            "page": page
+        }
         response = self.client.get(endpoint, params=params)
-        return response.get('results', []) if response else []
+        results = response.get('results', []) if response else []
+        
+        # Sort results by language, with selected language first
+        target_lang = self.client.language.split('-')[0]
+        return sorted(results, key=lambda x: (
+            x.get('original_language', '') != target_lang,  # False (0) for target language comes first
+            x.get('vote_average', 0) == 0,  # True (1) for unrated shows, putting them last
+            -x.get('popularity', 0)  # Negative for descending order (higher popularity first)
+        ))
 
     def get_tv_details(self, show_id):
         """Get details for a TV show"""
