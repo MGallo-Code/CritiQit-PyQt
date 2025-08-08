@@ -1,7 +1,7 @@
-FROM node:20-bullseye
+FROM node:24-bookworm-slim
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git wget unzip python3 python3-pip build-essential \
-    ca-certificates watchman && rm -rf /var/lib/apt/lists/*
+    ca-certificates && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY package.json package-lock.json* yarn.lock* pnpm-lock.yaml* ./
 RUN if [ -f yarn.lock ]; then yarn install; \
