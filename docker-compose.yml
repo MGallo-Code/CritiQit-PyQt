@@ -1,0 +1,18 @@
+version: '3.9'
+services:
+  mobile:
+    build: ./apps/mobile
+    working_dir: /app
+    volumes:
+      - ./apps/mobile:/app
+      - /app/node_modules
+    ports:
+      - "19000:19000"
+      - "19001:19001"
+      - "19002:19002"
+      - "19006:19006"
+      - "8081:8081"
+    environment:
+      - EXPO_DEV_CLIENT=true
+      - NODE_OPTIONS=--max_old_space_size=4096
+    command: npm run start
