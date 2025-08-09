@@ -2,7 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { Button, FlatList, StyleSheet, Text, TextInput, View } from 'react-native';
 import { RatingService } from './src/services/RatingService';
-import { formatScore } from './src/models/Rating';
+import { formatScore } from './src/utils/score';
 
 export default function App() {
   const [title, setTitle] = useState('');

@@ -1,5 +1,6 @@
 import { getDatabase, runInTransaction } from '../db/sqlite';
-import { clampScoreOptional, CreateMovieRatingInput, MovieRatingRecord, UpdateMovieRatingInput } from '../models/Rating';
+import { CreateMovieRatingInput, MovieRatingRecord, UpdateMovieRatingInput } from '../models/Rating';
+import { clampScoreOptional } from '../utils/score';
 
 async function upsertTags(db: any, names: string[] = []): Promise<number[]> {
   if (!names.length) return [];
