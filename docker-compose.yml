@@ -1,5 +1,5 @@
 services:
-  mobile:
+  expo:
     build: ./apps/mobile
     working_dir: /app
     volumes:
@@ -14,4 +14,4 @@ services:
     environment:
       - EXPO_DEV_CLIENT=true
       - NODE_OPTIONS=--max_old_space_size=4096
-    command: npm run start
+    command: npm start
