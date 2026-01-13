@@ -2,7 +2,7 @@
 
 Before running the project's setup script, ensure the following dependencies are installed on your system:
 
-- **Python 3.7 or newer**:
+- **Python 3.9 - 3.13** (PySide6 compatibility):
   - Check your Python version:
     ```bash
     python3 --version
@@ -29,11 +29,14 @@ To access TMDB content, you need to create a .env file in the root of the projec
 3. Under **API Read Access Token**, copy your API key.
 
 ### **Steps to Create .env File:**
-1. In the root of your project directory, create a new file named `.env`.
-2. Add the following line to the file, replacing `your_api_key` with TMDB API key:
-```
-BEARER_TOKEN=your_api_key
-```
+1. In the root of your project directory, copy the example file:
+   ```bash
+   cp .env.example .env
+   ```
+2. Edit `.env` and replace `your_api_key` with your TMDB API Read Access Token:
+   ```
+   TMDB_BEARER_TOKEN=your_api_key
+   ```
 
 ### (Optional) Importing Rating Data from IMDB/TMDB:
 

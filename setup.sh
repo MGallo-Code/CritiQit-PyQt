@@ -31,9 +31,16 @@ install_dependencies() {
     pip install -r requirements.txt
 }
 
+# Function to create required directories
+create_directories() {
+    echo "Creating required directories..."
+    mkdir -p data
+}
+
 # Main script
 delete_venv
 create_venv
 install_dependencies
+create_directories
 
 echo "Setup complete! You are now in your new virtual environment."

@@ -24,4 +24,7 @@ pip install --upgrade pip
 Write-Host "Installing dependencies..."
 pip install -r requirements.txt
 
+Write-Host "Creating required directories..."
+New-Item -ItemType Directory -Force -Path "data" | Out-Null
+
 Write-Host "Setup complete! To activate the virtual environment, use:"
